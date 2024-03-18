@@ -12,17 +12,6 @@ api = Blueprint('api', __name__)
 # Allow CORS requests to this API
 CORS(api)
 
-
-@api.route('/hello', methods=['POST', 'GET'])
-def handle_hello():
-
-    response_body = {
-        "message": "Hello! I'm a message that came from the backend, check the network tab on the google inspector and you will see the GET request"
-    }
-
-    return jsonify(response_body), 200
-
-
 @api.route('/people', methods=['GET'])
 def getpeople():
     personajes=Personajes.query.all()
@@ -39,13 +28,29 @@ def getplanetas():
     results=list(map(lambda item:item.serialize(),planetas))
     return jsonify(results),200
 
-@api.route('/usuario', methods=['GET'])
+@api.route('/user', methods=['GET','POST'])
 def getusuario():
-    usuario=User.query.all()
-    if usuario==[]:
-        return jsonify({"msg":"no existen usuarios"})
-    results=list(map(lambda item:item.serialize(),usuario))
-    return jsonify(results),200
+    if request.method=='GET':
+        usuario=User.query.all()
+        if usuario==[]:
+            return jsonify({"msg":"no existen usuarios"})
+        results=list(map(lambda item:item.serialize(),usuario))
+        return jsonify(results),200
+    if request.method=='POST':
+        body=json.loads(request.data)
+        usuario=User.query.filter_by(email=body["email"]).first()
+        if usuario is None:
+            nuevo_usuario=User(
+                email=body["email"],
+                password=body["password"]
+            )
+            db.session.add(nuevo_usuario)
+            db.session.commit()
+            return jsonify({"msg":"usuario creado"})
+        return jsonify({"msg":"ya existe usuario"})
+        
+
+
 
 
 @api.route('/planetas/<int:id>', methods=['GET'])
