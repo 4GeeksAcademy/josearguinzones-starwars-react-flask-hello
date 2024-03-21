@@ -1,17 +1,28 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Context } from "../store/appContext";
 
 export const Navbar = () => {
+	const { actions, store } = useContext(Context)
+	const navigate = useNavigate()
+	const logout = async () => {
+		await actions.logout()
+		if (store.auth == false) {
+			navigate("/")
+		}
+	}
+
+
 	return (
 		<nav className="navbar navbar-light bg-light">
 			<div className="container">
 				<Link to="/">
-					<span className="navbar-brand mb-0 h1">React Boilerplate</span>
+					<span className="navbar-brand mb-0 h1">Authentication</span>
 				</Link>
 				<div className="ml-auto">
-					<Link to="/demo">
-						<button className="btn btn-primary">Check the Context in action</button>
-					</Link>
+
+					<button onClick={logout} className="btn btn-primary">Cerrar sesion</button>
+
 				</div>
 			</div>
 		</nav>
